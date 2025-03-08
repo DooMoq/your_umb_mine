@@ -77,7 +77,7 @@ class _Signup2ScreenState extends State<Signup2Screen> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back_ios),
           onPressed: () {
             context.go('/signup');
           },

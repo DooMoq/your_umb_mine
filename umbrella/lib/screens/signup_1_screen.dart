@@ -31,7 +31,7 @@ class _Signup1ScreenState extends State<Signup1Screen> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back_ios),
           onPressed: () {
             if (GoRouter.of(context).canPop()) {
               context.pop();

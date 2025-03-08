@@ -3,6 +3,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:go_router/go_router.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -537,6 +538,9 @@ class _MainScreenState extends State<MainScreen> {
           if (label == "좌표") {
             _updateLocation(); // 좌표 버튼 클릭 시 현재 위치로 이동
           }
+          if (label == "날씨") {
+            context.push('/weather');
+          }
         },
         backgroundColor: const Color(0xFF5075AF),
         child: Icon(icon, color: Colors.white),
@@ -639,7 +643,9 @@ class _OnboardingPopupState extends State<_OnboardingPopup> {
                 height: 8,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: index == currentIndex ? Colors.blue : Colors.grey[300],
+                  color: index == currentIndex
+                      ? const Color(0xFF26539C)
+                      : const Color(0xFFA6ACCD),
                 ),
               ),
             ),

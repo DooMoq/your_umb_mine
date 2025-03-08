@@ -42,6 +42,7 @@ dependencies:
   geolocator: ^13.0.2
   flutter_gif: ^0.0.4
   bounce_tapper: ^1.1.4
+  html: ^0.15.5
 
 dev_dependencies:
   flutter_test:
@@ -82,6 +83,7 @@ flutter:
     - lib/assets/icons/7.jpg
     - lib/assets/icons/8.jpg
     - lib/assets/icons/9.jpg
+    - lib/assets/icons/sunny.png
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
