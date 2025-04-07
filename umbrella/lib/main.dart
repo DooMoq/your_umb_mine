@@ -6,6 +6,7 @@ import 'screens/signup_2_screen.dart';
 import 'screens/signup_3_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/main_screen.dart';
+import 'screens/user_info_screen.dart';
 
 void main() {
   runApp(
@@ -25,6 +26,9 @@ class MyApp extends StatelessWidget {
           path: '/signup3', builder: (context, state) => const Signup3Screen()),
       GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
       GoRoute(path: '/main', builder: (context, state) => const MainScreen()),
+      GoRoute(
+          path: '/user_info',
+          builder: (context, state) => const UserInfoScreen()),
     ],
   );
 

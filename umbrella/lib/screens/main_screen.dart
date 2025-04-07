@@ -3,6 +3,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:go_router/go_router.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -454,8 +455,13 @@ class _MainScreenState extends State<MainScreen> {
               const SizedBox(width: 10)
             ],
           ),
-          const Icon(Icons.chevron_right,
-              size: 30, color: Color.fromARGB(255, 67, 67, 67)),
+          IconButton(
+            icon: const Icon(Icons.chevron_right,
+                size: 30, color: Color.fromARGB(255, 67, 67, 67)),
+            onPressed: () {
+              context.push('/user_info'); // 여기가 핵심입니다.
+            },
+          ),
         ],
       ),
     );
