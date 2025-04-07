@@ -15,10 +15,15 @@ class _MainScreenState extends State<MainScreen> {
   final MapController _mapController = MapController();
   bool _locationPermissionGranted = false;
 
+  final LatLng _centerPoint = const LatLng(36.77203, 126.9316);
+  final double _radiusInMeters = 800;
+  bool _isOutside = false;
+
   @override
   void initState() {
     super.initState();
     _requestPermission();
+    _startMonitoringPosition();
   }
 
   Future<void> _requestPermission() async {
@@ -42,16 +47,47 @@ class _MainScreenState extends State<MainScreen> {
     _mapController.move(LatLng(position.latitude, position.longitude), 17);
   }
 
+  void _startMonitoringPosition() {
+    Geolocator.getPositionStream(
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.high,
+        distanceFilter: 10,
+      ),
+    ).listen((Position position) {
+      final double distance = const Distance().as(
+        LengthUnit.Meter,
+        _centerPoint,
+        LatLng(position.latitude, position.longitude),
+      );
+
+      if (distance > _radiusInMeters && !_isOutside) {
+        _isOutside = true;
+        _showOutOfRangeAlert();
+      } else if (distance <= _radiusInMeters && _isOutside) {
+        _isOutside = false;
+      }
+    });
+  }
+
+  void _showOutOfRangeAlert() {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("서비스 구역을 벗어났습니다."),
+        duration: Duration(seconds: 3),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
       child: Scaffold(
         drawerEnableOpenDragGesture: false,
-        drawer: _buildDrawer(), // ✅ 좌측 메뉴 추가
+        drawer: _buildDrawer(),
         body: Stack(
           children: [
-            // 지도 (FlutterMap)
             FlutterMap(
               mapController: _mapController,
               options: const MapOptions(
@@ -78,6 +114,18 @@ class _MainScreenState extends State<MainScreen> {
                       ),
                     ),
                   ),
+                CircleLayer(
+                  circles: [
+                    CircleMarker(
+                      point: _centerPoint,
+                      radius: _radiusInMeters,
+                      color: Colors.blue.withOpacity(0.2),
+                      borderColor: Colors.red,
+                      borderStrokeWidth: 0.5,
+                      useRadiusInMeter: true,
+                    ),
+                  ],
+                ),
                 GestureDetector(
                   onTap: () {
                     showModalBottomSheet(
@@ -88,7 +136,7 @@ class _MainScreenState extends State<MainScreen> {
                       ),
                       builder: (context) => Container(
                         padding: const EdgeInsets.all(20),
-                        height: 230, // 모달 높이 조절 가능
+                        height: 230,
                         decoration: const BoxDecoration(
                           color: Colors.white,
                           borderRadius:
@@ -97,7 +145,6 @@ class _MainScreenState extends State<MainScreen> {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            // 상단 바 (모달 핸들)
                             Container(
                               width: 50,
                               height: 3,
@@ -107,8 +154,6 @@ class _MainScreenState extends State<MainScreen> {
                               ),
                             ),
                             const SizedBox(height: 10),
-
-                            // 장소명 & 즐겨찾기 아이콘
                             const Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
@@ -119,12 +164,8 @@ class _MainScreenState extends State<MainScreen> {
                                     color: Color.fromARGB(255, 78, 78, 78),
                                   ),
                                 ),
-
-                                // 즐겨찾기 아이콘
                               ],
                             ),
-
-                            // 우산 & 빈 슬롯 정보
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
@@ -174,8 +215,6 @@ class _MainScreenState extends State<MainScreen> {
                               ],
                             ),
                             const SizedBox(height: 20),
-
-                            // 이용하기 버튼
                             SizedBox(
                               width: double.infinity,
                               height: 40,
@@ -190,17 +229,16 @@ class _MainScreenState extends State<MainScreen> {
                                   print("이용하기 버튼 클릭됨");
                                   showModalBottomSheet(
                                     context: context,
-                                    backgroundColor: Colors
-                                        .transparent, // ✅ 바텀시트의 배경을 투명하게 설정
-                                    isScrollControlled: true, // ✅ 바텀시트 크기 조절 가능
+                                    backgroundColor: Colors.transparent,
+                                    isScrollControlled: true,
                                     builder: (context) {
                                       return Container(
                                         margin: const EdgeInsets.all(15),
                                         height: 450,
                                         decoration: BoxDecoration(
                                           color: Colors.white,
-                                          borderRadius: BorderRadius.circular(
-                                              30), // ✅ 둥근 모서리
+                                          borderRadius:
+                                              BorderRadius.circular(30),
                                         ),
                                         child: Column(
                                           mainAxisSize: MainAxisSize.min,
@@ -213,12 +251,10 @@ class _MainScreenState extends State<MainScreen> {
                                                   fontWeight: FontWeight.bold),
                                             ),
                                             const SizedBox(height: 20),
-                                            // ✅ NFC 아이콘
                                             Container(
                                               padding: const EdgeInsets.all(20),
                                               decoration: BoxDecoration(
-                                                color: Colors
-                                                    .transparent, // ✅ 아이콘 배경색
+                                                color: Colors.transparent,
                                                 borderRadius:
                                                     BorderRadius.circular(10),
                                               ),
@@ -226,9 +262,7 @@ class _MainScreenState extends State<MainScreen> {
                                                 mainAxisAlignment:
                                                     MainAxisAlignment.center,
                                                 children: [
-                                                  const SizedBox(
-                                                    width: 40,
-                                                  ),
+                                                  const SizedBox(width: 40),
                                                   Image.asset(
                                                     'lib/assets/tag.png',
                                                     width: 160,
@@ -237,7 +271,6 @@ class _MainScreenState extends State<MainScreen> {
                                               ),
                                             ),
                                             const SizedBox(height: 20),
-                                            // ✅ 설명 텍스트
                                             const Text(
                                               "휴대전화의 뒷면을 카드 리더기에 대세요.",
                                               style: TextStyle(
@@ -245,7 +278,6 @@ class _MainScreenState extends State<MainScreen> {
                                                   color: Colors.black),
                                             ),
                                             const SizedBox(height: 20),
-                                            // ✅ 취소 버튼
                                             Padding(
                                               padding:
                                                   const EdgeInsets.fromLTRB(
@@ -255,8 +287,7 @@ class _MainScreenState extends State<MainScreen> {
                                                 height: 40,
                                                 child: TextButton(
                                                   onPressed: () =>
-                                                      Navigator.pop(
-                                                          context), // ✅ 바텀시트 닫기
+                                                      Navigator.pop(context),
                                                   style: TextButton.styleFrom(
                                                     backgroundColor:
                                                         Colors.grey[300],
@@ -304,14 +335,12 @@ class _MainScreenState extends State<MainScreen> {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            // ✅ 타원형 배경
                             Container(
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 8, vertical: 1),
                               decoration: BoxDecoration(
                                 color: const Color(0xFF26539C),
-                                borderRadius:
-                                    BorderRadius.circular(20), // 둥근 모서리
+                                borderRadius: BorderRadius.circular(20),
                               ),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
@@ -322,7 +351,7 @@ class _MainScreenState extends State<MainScreen> {
                                   ),
                                   const SizedBox(width: 3),
                                   const Text(
-                                    "4", // 숫자
+                                    "4",
                                     style: TextStyle(
                                         color: Colors.white,
                                         fontSize: 14,
@@ -332,15 +361,14 @@ class _MainScreenState extends State<MainScreen> {
                                 ],
                               ),
                             ),
-                            // ✅ 아래 삼각형 (Transform 사용)
                             Transform.translate(
                               offset: const Offset(0, -6),
                               child: Transform.rotate(
-                                angle: 3.14 / 4, // 45도 회전
+                                angle: 3.14 / 4,
                                 child: Container(
                                   width: 10,
                                   height: 10,
-                                  color: const Color(0xFF26539C), // 삼각형과 같은 색상
+                                  color: const Color(0xFF26539C),
                                 ),
                               ),
                             ),
@@ -352,42 +380,27 @@ class _MainScreenState extends State<MainScreen> {
                 ),
               ],
             ),
-
-            // UI 오버레이 요소
-            Positioned(
-              top: 40,
-              left: 16,
-              child: _buildMenuButton(),
-            ),
+            Positioned(top: 40, left: 16, child: _buildMenuButton()),
             Positioned(
               top: 40,
               left: MediaQuery.of(context).size.width / 2 - 120,
               child: _buildTopContainer(),
             ),
-            Positioned(
-              top: 40,
-              right: 16,
-              child: _buildSearchButton(),
-            ),
-            Positioned(
-              bottom: 30,
-              right: 16,
-              child: _buildFloatingButtons(),
-            ),
+            Positioned(top: 40, right: 16, child: _buildSearchButton()),
+            Positioned(bottom: 30, right: 16, child: _buildFloatingButtons()),
           ],
         ),
       ),
     );
   }
 
-  // ✅ 햄버거 버튼 (Builder로 감싸서 context 오류 해결)
   Widget _buildMenuButton() {
     return Builder(
       builder: (context) {
         return IconButton(
           icon: const Icon(Icons.menu, size: 30, color: Colors.white),
           onPressed: () {
-            Scaffold.of(context).openDrawer(); // ✅ Drawer 열기
+            Scaffold.of(context).openDrawer();
           },
           style: ButtonStyle(
             backgroundColor: WidgetStateProperty.all(const Color(0xFF26539C)),
@@ -399,7 +412,6 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
-  // ✅ Drawer (좌측 메뉴)
   Widget _buildDrawer() {
     return Drawer(
       backgroundColor: Colors.white,
@@ -407,63 +419,41 @@ class _MainScreenState extends State<MainScreen> {
         children: [
           _buildDrawerHeader(),
           _buildDrawerMenuItem(Icons.history, "이용 내역"),
-          Container(
-            color: const Color.fromARGB(255, 173, 173, 173),
-            height: 0.7,
-          ),
+          Container(color: Colors.grey, height: 0.7),
           _buildDrawerMenuItem(Icons.info_outline, "이용 안내"),
-          Container(
-            color: const Color.fromARGB(255, 173, 173, 173),
-            height: 0.7,
-          ),
+          Container(color: Colors.grey, height: 0.7),
           _buildDrawerMenuItem(Icons.headset_mic, "고객센터"),
-          Container(
-            color: const Color.fromARGB(255, 173, 173, 173),
-            height: 0.7,
-          ),
         ],
       ),
     );
   }
 
-  // ✅ Drawer 상단 프로필 영역 (정렬 및 디자인 개선)
   Widget _buildDrawerHeader() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 40),
-      color: Colors.white,
       child: Row(
         children: [
-          // 프로필 이미지
           CircleAvatar(
             radius: 30,
             backgroundColor: Colors.grey[300],
             child: const Icon(Icons.person, size: 40, color: Colors.white),
           ),
           const SizedBox(width: 16),
-
-          // 사용자 정보
           Row(
             children: [
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  const Text(
-                    "김사물",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  Text(
-                    "iotkim1004",
-                    style: TextStyle(fontSize: 10, color: Colors.grey[600]),
-                  ),
+                  const Text("김사물",
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  Text("iotkim1004",
+                      style: TextStyle(fontSize: 10, color: Colors.grey[600])),
                 ],
               ),
-              const SizedBox(
-                width: 10,
-              )
+              const SizedBox(width: 10)
             ],
           ),
-
-          // 프로필 수정 아이콘 (">")
           const Icon(Icons.chevron_right,
               size: 30, color: Color.fromARGB(255, 67, 67, 67)),
         ],
@@ -471,16 +461,12 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
-  // ✅ Drawer 메뉴 리스트 스타일 개선
   Widget _buildDrawerMenuItem(IconData icon, String title) {
     return ListTile(
       leading: Icon(icon, color: Colors.grey[700]),
-      title: Text(
-        title,
-        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
-      ),
+      title: Text(title,
+          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
       onTap: () {
-        print("$title 클릭됨");
         Navigator.pop(context);
         if (title == "이용 안내") {
           showOnboardingDialog(context);
@@ -489,7 +475,6 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
-  // 상단 중앙 컨테이너 (곡률 있음)
   Widget _buildTopContainer() {
     return Container(
       width: 240,
@@ -502,7 +487,6 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
-  // 검색 버튼 (돋보기)
   Widget _buildSearchButton() {
     return IconButton(
       icon: const Icon(Icons.search, size: 30, color: Colors.white),
@@ -517,7 +501,6 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
-  // 하단 우측 아이콘 버튼 3개 (날씨, 클립, 좌표)
   Widget _buildFloatingButtons() {
     return Column(
       children: [
@@ -530,7 +513,6 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
-  // 공통 아이콘 버튼 스타일
   Widget _buildRoundIconButton(IconData icon, String label) {
     return Container(
       width: 50,
@@ -540,9 +522,8 @@ class _MainScreenState extends State<MainScreen> {
       child: FloatingActionButton(
         heroTag: label,
         onPressed: () {
-          print("$label 버튼 클릭됨");
           if (label == "좌표") {
-            _updateLocation(); // 좌표 버튼 클릭 시 현재 위치로 이동
+            _updateLocation();
           }
         },
         backgroundColor: const Color(0xFF5075AF),
@@ -558,8 +539,8 @@ class _OnboardingPopup extends StatefulWidget {
 }
 
 class _OnboardingPopupState extends State<_OnboardingPopup> {
-  int currentIndex = 0; // 현재 페이지 인덱스
-  final int totalPages = 9; // 전체 페이지 수
+  int currentIndex = 0;
+  final int totalPages = 9;
 
   final List<Map<String, String>> onboardingData = [
     {"title": "어떻게 대여/반납하나요?", "description": "지도에서 반납할 보관함 위치를\n확인하세요."},
@@ -610,37 +591,23 @@ class _OnboardingPopupState extends State<_OnboardingPopup> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // ✅ 제목
-          const SizedBox(
-            height: 30,
-          ),
-          Text(
-            onboardingData[currentIndex]["title"]!,
-            style: const TextStyle(
-              fontSize: 18,
-            ),
-          ),
+          const SizedBox(height: 30),
+          Text(onboardingData[currentIndex]["title"]!,
+              style: const TextStyle(fontSize: 18)),
           const SizedBox(height: 20),
-
-          // ✅ 중앙 이미지 (사용자가 직접 추가)
           Image.asset(
             'lib/assets/icons/${currentIndex + 1}.jpg',
             width: 170,
             height: 170,
             fit: BoxFit.contain,
           ),
-
           const SizedBox(height: 15),
-
-          // ✅ 설명 텍스트
           Text(
             onboardingData[currentIndex]["description"]!,
             textAlign: TextAlign.center,
             style: const TextStyle(fontSize: 14, color: Colors.grey),
           ),
           const Spacer(),
-
-          // ✅ 페이지 인디케이터
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: List.generate(
@@ -659,17 +626,13 @@ class _OnboardingPopupState extends State<_OnboardingPopup> {
             ),
           ),
           const SizedBox(height: 15),
-
-          // ✅ 하단 네비게이션 버튼
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               IconButton(
                 icon: const Icon(Icons.arrow_back_ios_new),
                 onPressed: prevPage,
-                color: currentIndex > 0
-                    ? Colors.black
-                    : Colors.transparent, // 첫 페이지에서는 비활성화 색상
+                color: currentIndex > 0 ? Colors.black : Colors.transparent,
               ),
               if (currentIndex < totalPages - 1)
                 IconButton(
@@ -679,7 +642,7 @@ class _OnboardingPopupState extends State<_OnboardingPopup> {
               else
                 IconButton(
                   icon: const Icon(Icons.close),
-                  onPressed: () => Navigator.pop(context), // 마지막 페이지에서는 닫기 버튼
+                  onPressed: () => Navigator.pop(context),
                 ),
             ],
           ),
@@ -694,9 +657,8 @@ void showOnboardingDialog(BuildContext context) {
     context: context,
     builder: (context) {
       return Dialog(
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20)), // 둥근 모서리
-        child: _OnboardingPopup(), // ✅ 별도 StatefulWidget으로 분리
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: _OnboardingPopup(),
       );
     },
   );
