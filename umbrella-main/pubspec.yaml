@@ -55,6 +55,7 @@ dependencies:
   url_launcher: ^6.3.1
   permission_handler: ^12.0.0+1
   intl: ^0.20.2
+  geodesy: ^0.10.2
 
 dev_dependencies:
   flutter_test:
@@ -94,6 +95,14 @@ flutter:
     - lib/assets/icons/7.jpg
     - lib/assets/icons/8.jpg
     - lib/assets/icons/9.jpg
+    - lib/assets/weather/cloud.png
+    - lib/assets/weather/drop.png
+    - lib/assets/weather/dull.png
+    - lib/assets/weather/humid.png
+    - lib/assets/weather/rain.png
+    - lib/assets/weather/sun.png
+    - lib/assets/weather/umbrella.png
+    - lib/assets/weather/snow.png
 #   - images/a_dot_ham.jpeg
 
 # An image asset can refer to one or more resolution-specific "variants", see

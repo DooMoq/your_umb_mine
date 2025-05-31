@@ -4,6 +4,7 @@ import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 import 'package:flutter_map_animations/flutter_map_animations.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:geodesy/geodesy.dart';
 import 'package:go_router/go_router.dart';
 import 'package:umbrella/provider/user_provider.dart';
 import 'package:provider/provider.dart';
@@ -29,6 +30,24 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
+  final Geodesy _geodesy = Geodesy();
+  bool _wasInsideZone = true;
+  final List<LatLng> _serviceZonePolygon = [
+    const LatLng(36.769787, 126.920788),
+    const LatLng(36.763569, 126.931493),
+    const LatLng(36.767275, 126.938528),
+    const LatLng(36.767429, 126.943422),
+    const LatLng(36.767765, 126.949654),
+    const LatLng(36.769481, 126.956612),
+    const LatLng(36.775146, 126.953133),
+    const LatLng(36.772880, 126.945869),
+    const LatLng(36.777535, 126.943307),
+    const LatLng(36.781638, 126.946289),
+    const LatLng(36.783598, 126.938681),
+    const LatLng(36.783261, 126.931111),
+    const LatLng(36.778607, 126.928740),
+  ];
+
   final apiService = ApiService();
   final MapController _mapController = MapController();
   late final AnimatedMapController _animatedMapController =
@@ -40,6 +59,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+    _startGeofencing();
     requestPermissions();
     fetchAllLockerStatuses();
     loadFavorites();
@@ -546,6 +566,46 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   }
 
   @override
+  void _startGeofencing() {
+    Geolocator.getPositionStream(
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.high,
+        distanceFilter: 10,
+      ),
+    ).listen((Position position) {
+      final current = LatLng(position.latitude, position.longitude);
+      final isInsideNow =
+          _geodesy.isGeoPointInPolygon(current, _serviceZonePolygon);
+
+      if (_wasInsideZone && !isInsideNow) {
+        _showOutOfZonePopup();
+      }
+
+      _wasInsideZone = isInsideNow;
+    });
+  }
+
+  void _showOutOfZonePopup() {
+    if (!mounted) return;
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        content: const Text(
+          "이용 가능 지역이 아닙니다.",
+          style: TextStyle(fontSize: 16),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("확인"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
@@ -560,7 +620,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
               mapController: _mapController,
               options: const MapOptions(
                 initialZoom: 17,
-                minZoom: 13,
+                minZoom: 12,
                 maxZoom: 18,
                 initialCenter: LatLng(36.77203, 126.9316),
                 interactionOptions: InteractionOptions(
@@ -582,6 +642,62 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                       ),
                     ),
                   ),
+                PolygonLayer(
+                  polygons: [
+                    Polygon(
+                      points: [
+                        const LatLng(36.769787, 126.920788),
+                        const LatLng(36.763569, 126.931493),
+                        const LatLng(36.767275, 126.938528),
+                        const LatLng(36.767429, 126.943422),
+                        const LatLng(36.767765, 126.949654),
+                        const LatLng(36.769481, 126.956612),
+                        const LatLng(36.775146, 126.953133),
+                        const LatLng(36.772880, 126.945869),
+                        const LatLng(36.777535, 126.943307),
+                        const LatLng(36.781638, 126.946289),
+                        const LatLng(36.783598, 126.938681),
+                        const LatLng(36.783261, 126.931111),
+                        const LatLng(36.778607, 126.928740),
+                      ],
+                      borderColor: const Color(0xFF26539C),
+                      borderStrokeWidth: 3,
+                    ),
+                    Polygon(
+                      points: [
+                        const LatLng(37.468978, 130.536625),
+                        const LatLng(38.745888, 129.659989),
+                        const LatLng(37.605907, 124.836991),
+                        const LatLng(36.483590, 125.518185),
+                        const LatLng(36.769787, 126.920788),
+                        const LatLng(36.778607, 126.928740),
+                        const LatLng(36.783261, 126.931111),
+                        const LatLng(36.783598, 126.938681),
+                        const LatLng(36.781638, 126.946289),
+                        const LatLng(36.777535, 126.943307),
+                        const LatLng(36.772880, 126.945869),
+                        const LatLng(36.775146, 126.953133),
+                        const LatLng(36.769481, 126.956612),
+                      ],
+                      color: Colors.black.withOpacity(0.25),
+                    ),
+                    Polygon(
+                      points: [
+                        const LatLng(37.468978, 130.536625),
+                        const LatLng(34.775568, 130.250235),
+                        const LatLng(33.928981, 124.910461),
+                        const LatLng(36.483590, 125.518185),
+                        const LatLng(36.769787, 126.920788),
+                        const LatLng(36.763569, 126.931493),
+                        const LatLng(36.767275, 126.938528),
+                        const LatLng(36.767429, 126.943422),
+                        const LatLng(36.767765, 126.949654),
+                        const LatLng(36.769481, 126.956612),
+                      ],
+                      color: Colors.black.withOpacity(0.25),
+                    ),
+                  ],
+                ),
                 MarkerLayer(
                   markers: allLockerStatus.map((locker) {
                     return Marker(
@@ -1007,7 +1123,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(16),
-            boxShadow: [
+            boxShadow: const [
               BoxShadow(
                 color: Colors.black12,
                 blurRadius: 6,
@@ -1015,18 +1131,18 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
               ),
             ],
           ),
-          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
           child: Row(
             children: [
               IconButton(
-                icon: Icon(Icons.arrow_back_ios, color: Colors.black87),
+                icon: const Icon(Icons.arrow_back_ios, color: Colors.black87),
                 onPressed: () => setState(() => isSearchOpen = false),
               ),
               Expanded(
                 child: TextField(
                   controller: _searchController,
                   autofocus: true,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     hintText: '우산함 위치 이름 검색',
                     border: InputBorder.none,
                   ),
@@ -1038,7 +1154,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                 ),
               ),
               IconButton(
-                icon: Icon(Icons.close, color: Colors.black87),
+                icon: const Icon(Icons.close, color: Colors.black87),
                 onPressed: () {
                   setState(() {
                     searchQuery = '';
@@ -1069,7 +1185,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
               return ListTile(
                 title: Text(
                   locker.locationName,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontWeight: FontWeight.w500,
                     fontSize: 16,
                     color: Color(0xFF333333),
@@ -1078,7 +1194,8 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                 trailing: IconButton(
                   icon: Icon(
                     isFavorite ? Icons.star : Icons.star_border,
-                    color: isFavorite ? Color(0xFFFFD700) : Colors.grey[400],
+                    color:
+                        isFavorite ? const Color(0xFFFFD700) : Colors.grey[400],
                   ),
                   onPressed: () => toggleFavorite(locker.lockerId),
                 ),
@@ -1195,6 +1312,8 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
           print("$label 버튼 클릭됨");
           if (label == "좌표") {
             _updateLocation(); // 좌표 버튼 클릭 시 현재 위치로 이동
+          } else if (label == "날씨") {
+            GoRouter.of(context).push('/weather'); // 날씨 버튼 클릭 시 weather 페이지로 이동
           }
         },
         backgroundColor: const Color(0xFF5075AF),

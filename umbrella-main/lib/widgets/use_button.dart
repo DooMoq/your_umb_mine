@@ -94,23 +94,23 @@ class _UseButtonState extends State<UseButton> {
   Widget build(BuildContext context) {
     return SizedBox(
       width: double.infinity,
-      height: 50,
+      height: 40,
       child: ElevatedButton(
         onPressed: _isOverdue ? null : widget.onPressed,
         style: ButtonStyle(
-          backgroundColor: MaterialStateProperty.resolveWith<Color>((states) {
-            if (states.contains(MaterialState.disabled)) {
+          backgroundColor: WidgetStateProperty.resolveWith<Color>((states) {
+            if (states.contains(WidgetState.disabled)) {
               return const Color.fromARGB(255, 213, 213, 213); // 비활성화일 때 배경색
             }
             return const Color(0xFF00B2FF); // 활성화일 때 배경색
           }),
-          foregroundColor: MaterialStateProperty.resolveWith<Color>((states) {
-            if (states.contains(MaterialState.disabled)) {
+          foregroundColor: WidgetStateProperty.resolveWith<Color>((states) {
+            if (states.contains(WidgetState.disabled)) {
               return Colors.black54; // 비활성화일 때 텍스트 색상
             }
             return Colors.white; // 활성화일 때 텍스트 색상
           }),
-          shape: MaterialStateProperty.all(
+          shape: WidgetStateProperty.all(
             RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(40),
             ),

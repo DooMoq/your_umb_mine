@@ -6,11 +6,13 @@ import 'screens/signup_2_screen.dart';
 import 'screens/signup_3_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/main_screen.dart';
+import 'screens/weather_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:umbrella/provider/user_provider.dart';
 import 'package:umbrella/services/api_service.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'screens/user_screen.dart';
 
 String? initialNotificationType;
 void main() async {
@@ -98,6 +100,14 @@ class MyApp extends StatelessWidget {
       ),
       GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
       GoRoute(path: '/main', builder: (context, state) => const MainScreen()),
+      GoRoute(
+        path: '/weather',
+        builder: (context, state) => const WeatherScreen(),
+      ),
+      GoRoute(
+        path: '/profile',
+        builder: (context, state) => const UserScreen(),
+      ),
     ],
   );
 
