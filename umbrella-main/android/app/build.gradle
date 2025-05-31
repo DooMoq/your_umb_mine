@@ -8,7 +8,8 @@ plugins {
 android {
     namespace = "com.example.umbrella"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    ndkVersion = "27.0.12077973"
+    //ndkVersion = flutter.ndkVersion
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
@@ -37,7 +38,9 @@ android {
             signingConfig = signingConfigs.debug
         }
     }
+    
 }
+apply plugin: 'com.google.gms.google-services'
 
 flutter {
     source = "../.."

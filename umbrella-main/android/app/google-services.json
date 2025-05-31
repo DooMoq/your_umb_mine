@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "85335718893",
+    "project_id": "umb-devicetoken-test",
+    "storage_bucket": "umb-devicetoken-test.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:85335718893:android:23d86b6ba871617a57c5e4",
+        "android_client_info": {
+          "package_name": "com.example.umbrella"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAz766HisH2snJqmC2b0thXpcgkdYAQ1t0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

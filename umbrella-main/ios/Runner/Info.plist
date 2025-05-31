@@ -44,6 +44,11 @@
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
+	<key>NFCReaderUsageDescription</key>
+<string>이 기능은 우산 대여 및 반납을 위해 NFC를 사용합니다.</string>
+  <!-- ✅ NFC 권한 설명 추가 -->
+  <key>NFCReaderUsageDescription</key>
+  <string>이 기능은 우산 대여를 위해 NFC를 사용합니다.</string>
 	<true/>
 </dict>
 </plist>

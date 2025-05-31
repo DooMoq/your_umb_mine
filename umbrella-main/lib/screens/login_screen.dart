@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:umbrella/services/api_service.dart';
+import 'package:umbrella/services/auth_service.dart';
+import 'dart:developer' as developer;
+import 'package:umbrella/provider/user_provider.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -17,32 +21,42 @@ class _LoginScreenState extends State<LoginScreen> {
 
   // 로그인 버튼 클릭 시 호출되는 함수
   void _validateAndLogin() async {
-    String id = _idController.text.trim();
-    String password = _passwordController.text.trim();
+    try {
+      developer.log("🚀 로그인 시도");
 
-    if (id.isEmpty || password.isEmpty) {
-      // 아이디나 비밀번호가 비어있으면 오류 메시지 표시
-      setState(() {
-        _errorMessage = '아이디와 비밀번호를 입력해 주세요.';
-      });
-    } else {
-      // 서버에 로그인 요청
-      bool success = await ApiService().loginUser(id, password);
+      String id = _idController.text.trim();
+      String password = _passwordController.text.trim();
+
+      if (id.isEmpty || password.isEmpty) {
+        setState(() {
+          _errorMessage = '아이디와 비밀번호를 입력해 주세요.';
+        });
+        return;
+      }
+
+      final apiService = context.read<ApiService>();
+      final (success, message) =
+          await apiService.loginUser(context, id, password);
+      developer.log("✅ 로그인 결과: $success / $message");
       if (!mounted) return;
 
+      developer.log("✅ 로그인 결과: $success / $message");
+
       if (success) {
-        // 로그인 성공 시 메인 화면으로 이동
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text("로그인 성공!"),
-          backgroundColor: Colors.green,
-        ));
-        context.go('/main'); // 로그인 후 메인 화면으로 이동
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(message), backgroundColor: Colors.green),
+        );
+        context.go('/main');
       } else {
-        // 로그인 실패 시 오류 메시지 표시
         setState(() {
-          _errorMessage = '아이디 또는 비밀번호가 틀렸습니다.';
+          _errorMessage = message;
         });
       }
+    } catch (e) {
+      developer.log("❗ 로그인 중 예외: ${e.toString()}");
+      setState(() {
+        _errorMessage = "로그인 처리 중 오류: ${e.toString()}";
+      });
     }
   }
 
@@ -115,7 +129,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 25),
             // 오류 메시지 표시
             if (_errorMessage.isNotEmpty)
               Padding(
@@ -144,6 +157,23 @@ class _LoginScreenState extends State<LoginScreen> {
                       fontSize: 16,
                       color: Colors.white,
                       fontWeight: FontWeight.w600),
+                ),
+              ),
+            ),
+            const SizedBox(height: 25),
+            Center(
+              child: GestureDetector(
+                //사용자의 제스처(터치, 스와이프 등)를 감지하고 특정 동작
+                onTap: () {
+                  //터치했을 때
+                  context.go('/signup', extra: true);
+                },
+                child: const Text(
+                  "비밀번호를 잊어버리셨나요?",
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.blue,
+                  ),
                 ),
               ),
             ),

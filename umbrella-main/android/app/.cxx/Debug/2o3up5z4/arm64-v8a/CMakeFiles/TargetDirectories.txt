@@ -1,0 +1,2 @@
+C:/Users/note/Downloads/umbrella-main/umbrella-main/android/app/.cxx/Debug/2o3up5z4/arm64-v8a/CMakeFiles/edit_cache.dir
+C:/Users/note/Downloads/umbrella-main/umbrella-main/android/app/.cxx/Debug/2o3up5z4/arm64-v8a/CMakeFiles/rebuild_cache.dir
