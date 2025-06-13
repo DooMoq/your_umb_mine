@@ -1,0 +1,20 @@
+{
+  "buildFiles": [
+    "C:\\flutter\\packages\\flutter_tools\\gradle\\src\\main\\groovy\\CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "C:\\CookAndroid\\SDK\\cmake\\3.22.1\\bin\\ninja.exe",
+      "-C",
+      "C:\\Users\\note\\Downloads\\your_umb_mine-geofence-weatherinfo\\your_umb_mine-geofence-weatherinfo\\umbrella-main\\android\\app\\.cxx\\Debug\\w3328455\\armeabi-v7a",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "C:\\CookAndroid\\SDK\\cmake\\3.22.1\\bin\\ninja.exe",
+    "-C",
+    "C:\\Users\\note\\Downloads\\your_umb_mine-geofence-weatherinfo\\your_umb_mine-geofence-weatherinfo\\umbrella-main\\android\\app\\.cxx\\Debug\\w3328455\\armeabi-v7a",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {}
+}

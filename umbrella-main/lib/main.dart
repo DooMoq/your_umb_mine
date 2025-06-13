@@ -13,7 +13,6 @@ import 'package:umbrella/services/api_service.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'screens/user_screen.dart';
-import 'dart:async';
 
 String? initialNotificationType;
 void main() async {
@@ -36,28 +35,25 @@ void main() async {
   }
   final userProvider = UserProvider();
   await userProvider.loadUserFromStorage(); //앱 시작 시 사용자 데이터 로드
-  runZonedGuarded(() {
-    runApp(
-      //Flutter 애플리케이션을 시작하는 함수
-      MultiProvider(
-        //여러 개의 Provider를 한번에 관리하는 컨테이너.
-        providers: [
-          //Provider는 상태나 의존성을 관리
-          ChangeNotifierProvider(
-              //상태 관리를 위한 Provider
-              create: (_) => //(_): 인자를 사용하지 않고. () => object 형태: 객체 생성하고 반환
-                  userProvider), //ChangeNotifier를 상속받음. 따라서 notifyListeners()로 상태가 변경되면 이 상태를 구독하고 있는 UI 위젯들이 자동으로 갱신.
-          Provider<ApiService>(
-              create: (_) =>
-                  ApiService()), // ApiService를 싱글톤(애플리케이션 전반에서 한 번만 생성되도록)으로 앱에 주입
-        ],
-        child:
-            MyApp(), //MyApp()은 앱의 루트 위젯. MultiProvider를 통해 제공된 상태와 의존성을 MyApp 내에서 사용 가능
-      ),
-    );
-  }, (error, stackTrace) {
-    debugPrint('Uncaught async error: $error\n$stackTrace');
-  });
+
+  runApp(
+    //Flutter 애플리케이션을 시작하는 함수
+    MultiProvider(
+      //여러 개의 Provider를 한번에 관리하는 컨테이너.
+      providers: [
+        //Provider는 상태나 의존성을 관리
+        ChangeNotifierProvider(
+            //상태 관리를 위한 Provider
+            create: (_) => //(_): 인자를 사용하지 않고. () => object 형태: 객체 생성하고 반환
+                userProvider), //ChangeNotifier를 상속받음. 따라서 notifyListeners()로 상태가 변경되면 이 상태를 구독하고 있는 UI 위젯들이 자동으로 갱신.
+        Provider<ApiService>(
+            create: (_) =>
+                ApiService()), // ApiService를 싱글톤(애플리케이션 전반에서 한 번만 생성되도록)으로 앱에 주입
+      ],
+      child:
+          MyApp(), //MyApp()은 앱의 루트 위젯. MultiProvider를 통해 제공된 상태와 의존성을 MyApp 내에서 사용 가능
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {

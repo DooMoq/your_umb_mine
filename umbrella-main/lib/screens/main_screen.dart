@@ -20,6 +20,7 @@ import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:umbrella/widgets/use_button.dart';
+import 'package:umbrella/widgets/tilt.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -59,6 +60,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+    print("🟢 UseButton initState");
     _startGeofencing();
     requestPermissions();
     fetchAllLockerStatuses();
@@ -66,10 +68,11 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final userProvider = Provider.of<UserProvider>(context, listen: false);
-      await userProvider.loadUserFromStorage(); // ✅ 토큰 로딩 보장
+      await userProvider.loadUserFromStorage();
       print("불러온 토큰: ${userProvider.token}");
       print("디코딩된 사용자 정보: ${userProvider.userData}");
-      await fetchAndSetOverdueStatus(); // ✅ 그 후에 연체 상태 불러오기
+
+      await fetchAndSetOverdueStatus();
 
       if (!mounted) return;
 
@@ -268,6 +271,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
               _isOverdue = true;
               _releaseDate = releaseDate;
             });
+            developer.log("✅ 연체 팝업 띄우기 시도 중");
             _showOverduePopup(releaseDate);
 
             /// 🔽 여기서 타이머 시작
@@ -396,7 +400,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
         }
 
         umbrellaCount = status['umbrellaCount'];
-        emptySlotCount = 41 - umbrellaCount;
+        emptySlotCount = 44 - umbrellaCount;
         isFetching = false;
       });
     } catch (e) {
@@ -886,21 +890,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
             ),
           ),
           const SizedBox(height: 25),
-          Container(
-            width: 100,
-            height: 100,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(color: Colors.blue, width: 4),
-            ),
-            child: Center(
-              child: Image.asset(
-                'lib/assets/tag.png',
-                width: 50,
-                height: 50,
-              ),
-            ),
-          ),
+          TiltingPhoneIcon(),
           const SizedBox(height: 25),
           const Text(
             "Scan an NFC tag",
@@ -1501,9 +1491,9 @@ class LockerStatus {
   // 고정 위치 정보 Map
   static const Map<String, LockerMeta> _lockerMetaMap = {
     'lockerA': LockerMeta(36.77203, 126.9316, '미디어랩스'),
-    'lockerB': LockerMeta(36.77150, 126.9320, '도서관 입구'),
-    'lockerC': LockerMeta(36.77000, 126.9330, '학생회관'),
-    'lockerD': LockerMeta(36.77300, 126.9300, '정문 옆'),
+    'lockerB': LockerMeta(36.7687244, 126.9306909, '도서관'),
+    'lockerC': LockerMeta(36.7699363, 126.9314149, '학생회관'),
+    'lockerD': LockerMeta(36.7696489, 126.9324079, '유니토피아'),
   };
 
   factory LockerStatus.fromJson(Map<String, dynamic> json) {

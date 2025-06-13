@@ -36,7 +36,7 @@ class _UseButtonState extends State<UseButton> {
   @override
   void didUpdateWidget(covariant UseButton oldWidget) {
     super.didUpdateWidget(oldWidget);
-
+    print("🔄 UseButton didUpdateWidget");
     if (widget.isOverdue != oldWidget.isOverdue ||
         widget.releaseDate != oldWidget.releaseDate) {
       _timer?.cancel();
