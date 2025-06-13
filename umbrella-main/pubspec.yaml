@@ -56,6 +56,7 @@ dependencies:
   permission_handler: ^12.0.0+1
   intl: ^0.20.2
   geodesy: ^0.10.2
+  flutter_blue_plus: ^1.35.5
 
 dev_dependencies:
   flutter_test:
@@ -80,6 +81,7 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
+    - lib/assets/boonsil.png
     - lib/assets/nii_nae.jpg
     - lib/assets/umbrella.png
     - lib/assets/tag.png

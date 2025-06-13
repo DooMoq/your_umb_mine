@@ -21,6 +21,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:umbrella/widgets/use_button.dart';
 import 'package:umbrella/widgets/tilt.dart';
+import 'package:umbrella/services/bleconnector.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -32,6 +33,8 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   final Geodesy _geodesy = Geodesy();
+  LatLng? _lastDisconnectedPosition;
+  List<Marker> _bleMarkers = [];
   bool _wasInsideZone = true;
   final List<LatLng> _serviceZonePolygon = [
     const LatLng(36.769787, 126.920788),
@@ -62,9 +65,11 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     super.initState();
     print("🟢 UseButton initState");
     _startGeofencing();
+
     requestPermissions();
     fetchAllLockerStatuses();
     loadFavorites();
+    BleConnector.instance.connectedDeviceNotifier.addListener(_handleBleChange);
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final userProvider = Provider.of<UserProvider>(context, listen: false);
@@ -218,6 +223,32 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
         ),
       ),
     );
+  }
+
+  void _handleBleChange() async {
+    final isConnected = BleConnector.instance.isConnected;
+
+    if (!isConnected) {
+      final pos = await Geolocator.getCurrentPosition();
+      final latlng = LatLng(pos.latitude, pos.longitude);
+
+      setState(() {
+        _lastDisconnectedPosition = latlng;
+        _bleMarkers = [
+          Marker(
+            point: latlng,
+            width: 40,
+            height: 40,
+            child: Image.asset('lib/assets/boonsil.png'),
+          ),
+        ];
+      });
+    } else {
+      setState(() {
+        _lastDisconnectedPosition = null;
+        _bleMarkers.clear();
+      });
+    }
   }
 
   Future<void> fetchAndSetOverdueStatus() async {
@@ -593,15 +624,38 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     if (!mounted) return;
     showDialog(
       context: context,
-      builder: (_) => AlertDialog(
+      builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        content: const Text(
-          "이용 가능 지역이 아닙니다.",
-          style: TextStyle(fontSize: 16),
+        contentPadding: const EdgeInsets.fromLTRB(24, 27, 24, 10),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.error_outline, size: 51, color: Color(0xFF757575)),
+            const SizedBox(height: 16),
+            const Text(
+              "서비스 지역을 벗어났습니다.",
+              style: TextStyle(
+                fontSize: 18,
+                color: Color(0xFF757575),
+                fontWeight: FontWeight.w600,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 4),
+          ],
         ),
+        actionsAlignment: MainAxisAlignment.center,
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.of(context).pop(),
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.white,
+              backgroundColor: Colors.lightBlue,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
             child: const Text("확인"),
           ),
         ],
@@ -644,6 +698,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                   },
                   tileProvider: NetworkTileProvider(),
                 ),
+                MarkerLayer(markers: _bleMarkers),
                 if (_locationPermissionGranted)
                   CurrentLocationLayer(
                     style: LocationMarkerStyle(
@@ -711,6 +766,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                     ),
                   ],
                 ),
+
                 MarkerLayer(
                   markers: allLockerStatus.map((locker) {
                     return Marker(
@@ -1328,6 +1384,8 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
             _updateLocation(); // 좌표 버튼 클릭 시 현재 위치로 이동
           } else if (label == "날씨") {
             GoRouter.of(context).push('/weather'); // 날씨 버튼 클릭 시 weather 페이지로 이동
+          } else if (label == "클립") {
+            GoRouter.of(context).push('/ble'); // ble 이동
           }
         },
         backgroundColor: const Color(0xFF5075AF),

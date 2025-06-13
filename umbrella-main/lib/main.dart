@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:umbrella/screens/ble.dart';
 import 'screens/first_screen.dart';
 import 'screens/signup_1_screen.dart';
 import 'screens/signup_2_screen.dart';
@@ -13,9 +14,11 @@ import 'package:umbrella/services/api_service.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'screens/user_screen.dart';
+import 'services/bleconnector.dart';
 
 String? initialNotificationType;
 void main() async {
+  BleConnector.instance;
   WidgetsFlutterBinding
       .ensureInitialized(); //Flutter의 바인딩(내부 연결 시스템) 준비 완료. = Flutter 앱이 본격적으로 시작되기 전에 필요한 준비를 완료. (앱 시작 전에 꼭 초기화해야 하는 SharedPreferences (앱에 저장된 데이터 불러올 때) 때문에 사용)
   try {
@@ -107,6 +110,10 @@ class MyApp extends StatelessWidget {
       GoRoute(
         path: '/profile',
         builder: (context, state) => const UserScreen(),
+      ),
+      GoRoute(
+        path: '/ble',
+        builder: (context, state) => Ble(),
       ),
     ],
   );
